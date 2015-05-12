@@ -108,6 +108,20 @@
     dispatch_async(dispatch_get_main_queue(), ^{
         [self.messageTable insertRowsAtIndexPaths:@[insertionPath]
                                  withRowAnimation:UITableViewRowAnimationAutomatic];
+        // 增加功能：让消息显示一段时间后消失
+        float delayInSeconds = 10.0f;
+        
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delayInSeconds * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            NSUInteger objIndex = [self.messages indexOfObjectIdenticalTo:message];
+            [self.messages removeObjectAtIndex:objIndex];
+            NSIndexPath *indexPath = [NSIndexPath indexPathForRow:objIndex inSection:0];
+            
+            [self.messageTable deleteRowsAtIndexPaths:@[indexPath]
+                                     withRowAnimation:UITableViewRowAnimationAutomatic];
+        });
+        
+        
+        
     });
 }
 
