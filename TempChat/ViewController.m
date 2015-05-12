@@ -47,10 +47,9 @@
     dispatch_async(dispatch_get_global_queue(0, 0), ^{
         [self connectToServer:self.serverAddressField.text];
         
-        // Sleep in order to wait for a message to be prepared
-        // by the server.  This will not remain by the time we
-        // reach the end of the exercise.
-        sleep(1);
+        NSTimer *timer = [[NSTimer alloc] initWithFireDate:nil interval:0.5 target:self selector:@selector(readFromSocket) userInfo:nil repeats:YES];
+        
+        [[NSRunLoop mainRunLoop] addTimer:timer forMode:NSDefaultRunLoopMode];
         
         // Read welcome message
         [self readFromSocket];
