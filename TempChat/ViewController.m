@@ -82,6 +82,14 @@
     dispatch_source_set_event_handler(self.socketSource, ^{
         [self readFromSocket];
     });
+    //  设置取消后的回调
+    dispatch_source_set_cancel_handler(self.socketSource, ^{
+        NSLog(@"Cancelled");
+        close(self.socketFD);
+        dispatch_async(dispatch_get_main_queue(), ^{
+            self.connectButton.enabled = YES;
+        });
+    });
     dispatch_resume(self.socketSource);
 }
 
@@ -97,6 +105,7 @@
     }
     else if (numBytesRead == 0) {
         NSLog(@"0 bytes available on socket.");
+        dispatch_source_cancel(self.socketSource);
         return;
     }
     
