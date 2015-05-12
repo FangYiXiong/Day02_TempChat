@@ -19,6 +19,7 @@
 
 @property (strong, nonatomic) NSMutableArray    *messages;
 @property (assign, nonatomic) int                socketFD;
+@property (nonatomic, strong) dispatch_source_t socketSource;
 
 @end
 
@@ -47,12 +48,9 @@
     dispatch_async(dispatch_get_global_queue(0, 0), ^{
         [self connectToServer:self.serverAddressField.text];
         
-        NSTimer *timer = [[NSTimer alloc] initWithFireDate:nil interval:0.5 target:self selector:@selector(readFromSocket) userInfo:nil repeats:YES];
-        
-        [[NSRunLoop mainRunLoop] addTimer:timer forMode:NSDefaultRunLoopMode];
-        
-        // Read welcome message
-        [self readFromSocket];
+//        NSTimer *timer = [[NSTimer alloc] initWithFireDate:nil interval:0.5 target:self selector:@selector(readFromSocket) userInfo:nil repeats:YES];
+//        
+//        [[NSRunLoop mainRunLoop] addTimer:timer forMode:NSDefaultRunLoopMode];
     });
 }
 
@@ -79,6 +77,12 @@
     fcntl(self.socketFD, F_SETFL, O_NONBLOCK);
     
     // Create dispatch source for socket
+    
+    self.socketSource = dispatch_source_create(DISPATCH_SOURCE_TYPE_READ, self.socketFD, 0, dispatch_get_global_queue(0, 0));
+    dispatch_source_set_event_handler(self.socketSource, ^{
+        [self readFromSocket];
+    });
+    dispatch_resume(self.socketSource);
 }
 
 - (void)readFromSocket
